@@ -136,7 +136,7 @@ def lm_sent(tokens, idf_dict, sent_dict):
 
 
 def analyse_from_excel():
-    data = pd.read_excel('input-file.xlsx', sheetname='Sheet3')
+    data = pd.read_excel('input-file.xlsx', sheet_name='Sheet3')
     data.head(3)
     data.info()
     data['Text'] = data.apply(lambda row: concat(row['All notes'], row['empty']), axis=1)
@@ -191,13 +191,63 @@ def extract_text_from_word(file_path, file_name):
     title, year = file_name.split('.')[0].split('_')
     document = docx.Document(file_path)
     doc_text = ''.join([paragraph.text for paragraph in document.paragraphs])
-    doc_text = doc_text.replace('"', '')
     doc_text = doc_text.replace('\n', ' ')
+    doc_text = doc_text.replace('"', ' ')
+    doc_text = doc_text.replace(';', ' ')
     doc_text = re.sub(r' {2,}', ' ', doc_text)
     return [title, year, doc_text]
 
 
+# def read_from_input_csv(file_name):
+#     results = []
+#     with open(file_name, 'r', encoding='utf-8') as csv_file:
+#         csv_reader = csv.reader(csv_file, delimiter=';')
+#         for title, year, text in csv_reader:
+#             results.append([title, year, text])
+#     return results
+
+
+def analyse_from_word(source_folder_path, csv_file_path):
+    read_from_word(source_folder_path)
+    data = pd.read_csv(csv_file_path, delimiter=';')
+    data.head(3)
+    data.info()
+    data['Text'] = data.apply(lambda row: row[2], axis=1)
+    data.Text.describe()
+    data.info()
+    data.Text.head()
+    nltk.sent_tokenize(data.Text.head()[0])
+    data[['rate_d', 'rate_sentences', 'rate_count']] = data.Text.apply(lambda paragraph: pd.Series(sentence_tokenize(paragraph)))
+    data['rate_count'].describe()
+
+    stop = set(stopwords.words('english'))
+    wordnet_lemmatizer = WordNetLemmatizer()
+
+    data['Tokens'] = data.Text.apply(lambda text: tokenize(str(text)))
+
+    data.Tokens.head()
+
+    data.Text.head()
+
+    lm_panda = pd.read_csv('LoughranMcDonald_MasterDictionary_2016.csv')
+    sent_cols = ['Negative', 'Positive', 'Uncertainty', 'Litigious', 'Constraining', 'Superfluous', 'Interesting', 'Modal']
+    sent_dict = {}
+
+    for col in sent_cols:
+        sent_dict[col] = set([x.lower() for x in lm_panda[lm_panda[col] != 0]['Word'].tolist()])
+    all_lists = data.Tokens.tolist()
+    tokens_list = [val for sublist in all_lists for val in sublist]
+    tokens_list = [val for sublist in tokens_list for val in sublist]
+
+    # Creats the table with the idf scores
+    idf_dict = idf(tokens_list)
+
+    data.Tokens.head().apply(lambda note: lms(note, idf_dict, sent_dict, sent_cols))
+    sent_col = [col for col in sent_cols]
+    data[sent_col] = data.Tokens.apply(lambda note_tokens: pd.Series(lms(note_tokens, idf_dict, sent_dict, sent_cols)))
+    data[sent_col].head()
+
+
 if __name__ == '__main__':
     # analyse_from_excel()
-    # read_from_word()
-    read_from_word('samples')
+    analyse_from_word('samples', 'input.csv')
