@@ -144,7 +144,8 @@ def analyse_from_excel():
     data.info()
     data.Text.head()
     nltk.sent_tokenize(data.Text.head()[0])
-    data[['rate_d', 'rate_sentences', 'rate_count']] = data.Text.apply(lambda paragraph: pd.Series(sentence_tokenize(paragraph)))
+    data[['rate_d', 'rate_sentences', 'rate_count']] = data.Text.apply(
+        lambda paragraph: pd.Series(sentence_tokenize(paragraph)))
     data['rate_count'].describe()
 
     stop = set(stopwords.words('english'))
@@ -157,7 +158,8 @@ def analyse_from_excel():
     data.Text.head()
 
     lm_panda = pd.read_csv('LoughranMcDonald_MasterDictionary_2016.csv')
-    sent_cols = ['Negative', 'Positive', 'Uncertainty', 'Litigious', 'Constraining', 'Superfluous', 'Interesting', 'Modal']
+    sent_cols = ['Negative', 'Positive', 'Uncertainty', 'Litigious', 'Constraining', 'Superfluous', 'Interesting',
+                 'Modal']
     sent_dict = {}
 
     for col in sent_cols:
@@ -175,6 +177,7 @@ def analyse_from_excel():
     data[sent_col].head()
 
 
+# Read word files
 def read_from_word(path):
     results = []
     for file_name in listdir(path):
@@ -217,7 +220,8 @@ def analyse_from_word(source_folder_path, csv_file_path):
     data.info()
     data.Text.head()
     nltk.sent_tokenize(data.Text.head()[0])
-    data[['rate_d', 'rate_sentences', 'rate_count']] = data.Text.apply(lambda paragraph: pd.Series(sentence_tokenize(paragraph)))
+    data[['rate_d', 'rate_sentences', 'rate_count']] = data.Text.apply(
+        lambda paragraph: pd.Series(sentence_tokenize(paragraph)))
     data['rate_count'].describe()
 
     stop = set(stopwords.words('english'))
@@ -230,7 +234,8 @@ def analyse_from_word(source_folder_path, csv_file_path):
     data.Text.head()
 
     lm_panda = pd.read_csv('LoughranMcDonald_MasterDictionary_2016.csv')
-    sent_cols = ['Negative', 'Positive', 'Uncertainty', 'Litigious', 'Constraining', 'Superfluous', 'Interesting', 'Modal']
+    sent_cols = ['Negative', 'Positive', 'Uncertainty', 'Litigious', 'Constraining', 'Superfluous', 'Interesting',
+                 'Modal']
     sent_dict = {}
 
     for col in sent_cols:
